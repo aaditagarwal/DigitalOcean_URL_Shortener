@@ -14,6 +14,7 @@ spring:
       maximum-pool-size: 5
       minimum-idle: 1
       connection-timeout: 10000
+      connection-init-sql: SET search_path TO urlshortener
   jpa:
     open-in-view: false
     hibernate:
@@ -22,10 +23,14 @@ spring:
       hibernate:
         jdbc:
           time_zone: UTC
-        dialect: org.hibernate.dialect.PostgreSQLDialect
+        default_schema: urlshortener
   flyway:
     enabled: true
     locations: classpath:db/migration
+    # App Platform / PG15+ often revokes CREATE on public; use an app-owned schema.
+    schemas: urlshortener
+    default-schema: urlshortener
+    create-schemas: true
 
 management:
   endpoints:
