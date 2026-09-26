@@ -2,7 +2,7 @@ name: url-shortener-aadit
 region: blr
 
 databases:
-  - name: urlshortener-aadit-pg
+  - name: url-shortener-aadit-storage
     engine: PG
     version: "18"
     production: true
@@ -34,11 +34,11 @@ services:
         value: ${APP_URL}
       - key: SPRING_DATASOURCE_URL
         scope: RUN_TIME
-        value: ${urlshortener-aadit-pg.JDBC_DATABASE_URL}
+        value: ${url-shortener-aadit-storage.JDBC_DATABASE_URL}
       - key: SPRING_DATASOURCE_USERNAME
         scope: RUN_TIME
-        value: ${urlshortener-aadit-pg.USERNAME}
+        value: ${url-shortener-aadit-storage.USERNAME}
       - key: SPRING_DATASOURCE_PASSWORD
         scope: RUN_TIME
         type: SECRET
-        value: ${urlshortener-aadit-pg.PASSWORD}
+        value: ${url-shortener-aadit-storage.PASSWORD}
