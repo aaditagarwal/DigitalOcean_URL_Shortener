@@ -44,6 +44,6 @@ Required GitHub secret: `DIGITALOCEAN_ACCESS_TOKEN`
 
 Smoke scaffold + DB connectivity + persistence layer (Flyway `short_urls`, entity, repository).
 
-**Design plan:** [docs/DESIGN.md](docs/DESIGN.md) — APIs, validation, DTOs/DAOs, customCode concurrency, and per-endpoint behavior.
+**Design plan:** [docs/DESIGN.md](docs/DESIGN.md) — APIs, validation, DTOs/DAOs, per-endpoint behavior, and **v2 optional `customCode`** (409 on conflict, DB unique, sync-only).
 
 **Persistence:** Flyway `V1__create_short_urls.sql`, `ShortUrlEntity`, `ShortUrlRepository` (find / soft-deactivate / click increment).
