@@ -49,7 +49,7 @@ jobs:
       - name: Upsert App Platform app
         run: |
           set -euo pipefail
-          APP_NAME="url_shortener_aadit"
+          APP_NAME="url-shortener-aadit"
           APP_ID="$(doctl apps list -o json | python3 -c "
           import json,sys
           apps=json.load(sys.stdin)

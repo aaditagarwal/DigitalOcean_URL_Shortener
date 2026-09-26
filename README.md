@@ -3,7 +3,7 @@
 Spring Boot 3 / Java 21 REST API scaffold for DigitalOcean App Platform.
 
 **GitHub:** https://github.com/aaditagarwal/DigitalOcean_URL_Shortener  
-**App name:** `url_shortener_aadit`
+**App name:** `url-shortener-aadit` (App Platform requires hyphens; alias for `url_shortener_aadit`)
 
 ## Stack
 
