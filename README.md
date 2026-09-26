@@ -46,4 +46,6 @@ Smoke scaffold + DB connectivity + persistence layer (Flyway `short_urls`, entit
 
 **Design plan:** [docs/DESIGN.md](docs/DESIGN.md) — APIs, validation, DTOs/DAOs, per-endpoint behavior, and **v2 optional `customCode`** (409 on conflict, DB unique, sync-only).
 
-**Persistence:** Flyway `V1__create_short_urls.sql`, `ShortUrlEntity`, `ShortUrlRepository` (find / soft-deactivate / click increment).
+**Persistence:** Flyway `V1`/`V2` (`short_urls`, `code` VARCHAR(32)), `ShortUrlEntity`, `ShortUrlRepository`.
+
+**Create API:** `POST /api/v1/urls` — auto-generated codes or optional `customCode` (409 on conflict).

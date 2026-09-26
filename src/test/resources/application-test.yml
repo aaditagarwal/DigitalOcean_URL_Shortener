@@ -13,3 +13,6 @@ spring:
   test:
     database:
       replace: none
+
+app:
+  public-base-url: http://localhost:8080

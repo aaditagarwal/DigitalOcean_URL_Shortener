@@ -25,6 +25,9 @@ services:
       - key: JAVA_OPTS
         scope: RUN_TIME
         value: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
+      - key: PUBLIC_BASE_URL
+        scope: RUN_TIME
+        value: ${APP_URL}
       - key: SPRING_DATASOURCE_URL
         scope: RUN_TIME
         value: ${url-shortener-aadit-storage.JDBC_DATABASE_URL}

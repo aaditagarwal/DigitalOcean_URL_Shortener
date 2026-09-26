@@ -18,7 +18,7 @@ public class ShortUrlEntity {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(nullable = false, unique = true, length = 16)
+  @Column(nullable = false, unique = true, length = 32)
   private String code;
 
   @Column(name = "original_url", nullable = false, length = 2048)
@@ -47,7 +47,7 @@ public class ShortUrlEntity {
   }
 
   @PrePersist
-  void onCreate() {
+  public void onCreate() {
     if (createdAt == null) {
       createdAt = Instant.now();
     }

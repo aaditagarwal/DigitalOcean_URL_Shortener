@@ -46,3 +46,6 @@ springdoc:
     path: /v3/api-docs
   swagger-ui:
     path: /swagger-ui.html
+
+app:
+  public-base-url: ${PUBLIC_BASE_URL:}

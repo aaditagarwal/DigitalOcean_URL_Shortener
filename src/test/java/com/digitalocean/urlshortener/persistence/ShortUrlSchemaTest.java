@@ -54,7 +54,7 @@ class ShortUrlSchemaTest {
   }
 
   @Test
-  void flywaySchemaHistoryRecordsVersion1() {
+  void flywaySchemaHistoryRecordsVersions() {
     List<String> versions =
         jdbcTemplate.query(
             """
@@ -65,7 +65,21 @@ class ShortUrlSchemaTest {
             """,
             (rs, rowNum) -> rs.getString(1));
 
-    assertThat(versions).contains("1");
+    assertThat(versions).contains("1", "2");
+  }
+
+  @Test
+  void codeColumnAcceptsCustomLengthUpTo32() {
+    String code32 = "a".repeat(32);
+    jdbcTemplate.update(
+        "INSERT INTO short_urls (code, original_url, created_at, active, click_count) "
+            + "VALUES (?, 'https://long.example', CURRENT_TIMESTAMP, TRUE, 0)",
+        code32);
+
+    Integer count =
+        jdbcTemplate.queryForObject(
+            "SELECT COUNT(*) FROM short_urls WHERE code = ?", Integer.class, code32);
+    assertThat(count).isEqualTo(1);
   }
 
   @Test
