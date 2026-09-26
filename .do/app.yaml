@@ -2,13 +2,9 @@ name: url-shortener-aadit
 region: blr
 
 databases:
-  - name: db
+  - name: url-shortener-aadit-storage
     engine: PG
-    version: "18"
-    production: true
-    cluster_name: db-url-shortner
-    db_name: urlshortener_aadit
-    db_user: urlshortener_aadit
+    version: "17"
 
 services:
   - name: api
@@ -31,11 +27,11 @@ services:
         value: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
       - key: SPRING_DATASOURCE_URL
         scope: RUN_TIME
-        value: ${db.JDBC_DATABASE_URL}
+        value: ${url-shortener-aadit-storage.JDBC_DATABASE_URL}
       - key: SPRING_DATASOURCE_USERNAME
         scope: RUN_TIME
-        value: ${db.USERNAME}
+        value: ${url-shortener-aadit-storage.USERNAME}
       - key: SPRING_DATASOURCE_PASSWORD
         scope: RUN_TIME
         type: SECRET
-        value: ${db.PASSWORD}
+        value: ${url-shortener-aadit-storage.PASSWORD}

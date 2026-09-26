@@ -9,7 +9,7 @@ Spring Boot 3 / Java 21 REST API scaffold for DigitalOcean App Platform.
 
 - Java 21, Spring Boot 3.5, Maven
 - **Persistence:** Spring Data JPA + HikariCP + PostgreSQL JDBC driver (`org.postgresql:postgresql`)
-- **Database:** DigitalOcean Managed PostgreSQL (`db-url-shortner` / db `urlshortener_aadit`)
+- **Database:** DigitalOcean App Platform Postgres `url-shortener-aadit-storage`
 - Validation + Actuator (includes DB health)
 - OpenAPI / Swagger UI (`/swagger-ui.html`)
 - Dockerfile-based build on DigitalOcean App Platform
