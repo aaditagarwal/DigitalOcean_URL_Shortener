@@ -10,7 +10,8 @@ Spring Boot 3 / Java 21 REST API scaffold for DigitalOcean App Platform.
 - Java 21, Spring Boot 3.5, Maven
 - Validation + Actuator
 - OpenAPI / Swagger UI (`/swagger-ui.html`)
-- GitHub Actions CI (Maven test) + CD (DigitalOcean App Platform)
+- Dockerfile-based build on DigitalOcean App Platform
+- GitHub Actions CI (Maven test) + CD (upsert/deploy App Platform app)
 
 ## Local run
 

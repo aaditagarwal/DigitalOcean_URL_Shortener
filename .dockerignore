@@ -1,0 +1,8 @@
+target/
+.idea/
+.vscode/
+.git/
+.github/
+*.md
+ENVIRONMENT_VALIDATION.md
+.mvn/

@@ -7,8 +7,7 @@ services:
       repo: aaditagarwal/DigitalOcean_URL_Shortener
       branch: main
       deploy_on_push: false
-    build_command: mvn -B -DskipTests package
-    run_command: java -jar target/url-shortener.jar
+    dockerfile_path: Dockerfile
     http_port: 8080
     instance_count: 1
     instance_size_slug: basic-xxs
