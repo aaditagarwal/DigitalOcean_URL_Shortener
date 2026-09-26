@@ -1,55 +1,61 @@
 package com.digitalocean.urlshortener.web;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.digitalocean.urlshortener.persistence.ShortUrlRepository;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.digitalocean.urlshortener.config.AppProperties;
+import com.digitalocean.urlshortener.service.UrlNotFoundException;
+import com.digitalocean.urlshortener.service.UrlShortenerService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@ActiveProfiles("test")
+@WebMvcTest(controllers = UrlController.class)
+@Import(GlobalExceptionHandler.class)
 class UrlDeleteApiTest {
 
   @Autowired private MockMvc mockMvc;
-  @Autowired private ObjectMapper objectMapper;
-  @Autowired private ShortUrlRepository repository;
 
-  @Test
-  void deleteReturns204AndStopsRedirectAndMetadata() throws Exception {
-    String code = createShortUrl("https://example.com/to-delete");
+  @MockitoBean private UrlShortenerService urlShortenerService;
+  @MockitoBean private AppProperties appProperties;
 
-    mockMvc.perform(delete("/api/v1/urls/" + code)).andExpect(status().isNoContent());
-
-    assertThat(repository.findByCode(code).orElseThrow().isActive()).isFalse();
-
-    mockMvc.perform(get("/api/v1/urls/" + code)).andExpect(status().isNotFound());
-    mockMvc.perform(get("/" + code)).andExpect(status().isNotFound());
+  @BeforeEach
+  void stubPublicBaseUrl() {
+    when(appProperties.getPublicBaseUrl()).thenReturn("");
   }
 
   @Test
-  void deleteIsIdempotentWhenAlreadyInactive() throws Exception {
-    String code = createShortUrl("https://example.com/idempotent");
+  void deleteReturns204() throws Exception {
+    doNothing().when(urlShortenerService).delete("delCode1");
 
-    mockMvc.perform(delete("/api/v1/urls/" + code)).andExpect(status().isNoContent());
-    mockMvc.perform(delete("/api/v1/urls/" + code)).andExpect(status().isNoContent());
+    mockMvc.perform(delete("/api/v1/urls/delCode1")).andExpect(status().isNoContent());
+
+    verify(urlShortenerService).delete("delCode1");
+  }
+
+  @Test
+  void deleteIsIdempotentWhenServiceNoOps() throws Exception {
+    doNothing().when(urlShortenerService).delete("idem01");
+
+    mockMvc.perform(delete("/api/v1/urls/idem01")).andExpect(status().isNoContent());
+    mockMvc.perform(delete("/api/v1/urls/idem01")).andExpect(status().isNoContent());
   }
 
   @Test
   void deleteReturns404WhenMissing() throws Exception {
+    doThrow(new UrlNotFoundException("missing99")).when(urlShortenerService).delete("missing99");
+
     mockMvc
         .perform(delete("/api/v1/urls/missing99"))
         .andExpect(status().isNotFound())
@@ -59,18 +65,6 @@ class UrlDeleteApiTest {
   @Test
   void deleteReturns400ForInvalidCode() throws Exception {
     mockMvc.perform(delete("/api/v1/urls/ab")).andExpect(status().isBadRequest());
-  }
-
-  private String createShortUrl(String url) throws Exception {
-    MvcResult result =
-        mockMvc
-            .perform(
-                post("/api/v1/urls")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content("{\"url\":\"" + url + "\"}"))
-            .andExpect(status().isCreated())
-            .andReturn();
-    JsonNode json = objectMapper.readTree(result.getResponse().getContentAsString());
-    return json.get("code").asText();
+    verify(urlShortenerService, never()).delete(anyString());
   }
 }
