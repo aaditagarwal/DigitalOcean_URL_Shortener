@@ -8,23 +8,29 @@ Spring Boot 3 / Java 21 REST API scaffold for DigitalOcean App Platform.
 ## Stack
 
 - Java 21, Spring Boot 3.5, Maven
-- Validation + Actuator
+- **Persistence:** Spring Data JPA + HikariCP + PostgreSQL JDBC driver (`org.postgresql:postgresql`)
+- **Database:** DigitalOcean Managed PostgreSQL (`db-url-shortner` / db `urlshortener_aadit`)
+- Validation + Actuator (includes DB health)
 - OpenAPI / Swagger UI (`/swagger-ui.html`)
 - Dockerfile-based build on DigitalOcean App Platform
 - GitHub Actions CI (Maven test) + CD (upsert/deploy App Platform app)
+- Unit tests mock DB calls (no local database required)
 
 ## Local run
 
 ```bash
 export JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64   # adjust for your machine
 mvn test
+# App runtime requires Managed Postgres env vars (set by App Platform in deploy):
+#   SPRING_DATASOURCE_URL, SPRING_DATASOURCE_USERNAME, SPRING_DATASOURCE_PASSWORD
 mvn spring-boot:run
 ```
 
-- Health: `GET http://localhost:8080/health`
-- API root: `GET http://localhost:8080/api/v1`
-- Swagger UI: http://localhost:8080/swagger-ui.html
-
+- Health (liveness): `GET /health`
+- API root: `GET /api/v1`
+- DB connectivity: `GET /api/v1/db-status`
+- Actuator: `GET /actuator/health`
+- Swagger UI: `/swagger-ui.html`
 ## CI/CD
 
 | Workflow | Trigger | Purpose |
@@ -35,4 +41,4 @@ Required GitHub secret: `DIGITALOCEAN_ACCESS_TOKEN`
 
 ## Status
 
-Smoke-test scaffold only (`/health`, `/api/v1`, Swagger). Full URL-shortener design comes next.
+DB connectivity milestone in progress: Managed PostgreSQL attached; domain URL-shortener APIs next.
