@@ -5,6 +5,7 @@ spring:
   application:
     name: url-shortener
   datasource:
+    # App Platform injects SPRING_DATASOURCE_* from url-shortener-aadit-storage
     url: ${SPRING_DATASOURCE_URL}
     username: ${SPRING_DATASOURCE_USERNAME}
     password: ${SPRING_DATASOURCE_PASSWORD}
@@ -16,12 +17,15 @@ spring:
   jpa:
     open-in-view: false
     hibernate:
-      ddl-auto: none
+      ddl-auto: validate
     properties:
       hibernate:
         jdbc:
           time_zone: UTC
         dialect: org.hibernate.dialect.PostgreSQLDialect
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
 
 management:
   endpoints:

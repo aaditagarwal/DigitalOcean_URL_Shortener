@@ -1,6 +1,6 @@
 # URL Shortener API
 
-Spring Boot 3 / Java 21 REST API scaffold for DigitalOcean App Platform.
+Spring Boot 3 / Java 21 REST API for DigitalOcean App Platform.
 
 **GitHub:** https://github.com/aaditagarwal/DigitalOcean_URL_Shortener  
 **App name:** `url-shortener-aadit` (App Platform requires hyphens; alias for `url_shortener_aadit`)
@@ -8,13 +8,13 @@ Spring Boot 3 / Java 21 REST API scaffold for DigitalOcean App Platform.
 ## Stack
 
 - Java 21, Spring Boot 3.5, Maven
-- **Persistence:** Spring Data JPA + HikariCP + PostgreSQL JDBC driver (`org.postgresql:postgresql`)
+- **Persistence:** Spring Data JPA + HikariCP + Flyway + PostgreSQL JDBC (`org.postgresql:postgresql`)
 - **Database:** DigitalOcean App Platform Postgres `url-shortener-aadit-storage`
+- H2 (PostgreSQL mode) for repository/schema tests
 - Validation + Actuator (includes DB health)
 - OpenAPI / Swagger UI (`/swagger-ui.html`)
 - Dockerfile-based build on DigitalOcean App Platform
 - GitHub Actions CI (Maven test) + CD (upsert/deploy App Platform app)
-- Unit tests mock DB calls (no local database required)
 
 ## Local run
 
@@ -31,6 +31,7 @@ mvn spring-boot:run
 - DB connectivity: `GET /api/v1/db-status`
 - Actuator: `GET /actuator/health`
 - Swagger UI: `/swagger-ui.html`
+
 ## CI/CD
 
 | Workflow | Trigger | Purpose |
@@ -41,4 +42,8 @@ Required GitHub secret: `DIGITALOCEAN_ACCESS_TOKEN`
 
 ## Status
 
-DB connectivity milestone in progress: Managed PostgreSQL attached; domain URL-shortener APIs next.
+Smoke scaffold + DB connectivity + persistence layer (Flyway `short_urls`, entity, repository).
+
+**Design plan:** [docs/DESIGN.md](docs/DESIGN.md) — APIs, validation, DTOs/DAOs, customCode concurrency, and per-endpoint behavior.
+
+**Persistence:** Flyway `V1__create_short_urls.sql`, `ShortUrlEntity`, `ShortUrlRepository` (find / soft-deactivate / click increment).
