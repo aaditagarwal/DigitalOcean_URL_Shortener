@@ -14,7 +14,7 @@ public class OpenApiConfig {
         .info(
             new Info()
                 .title("URL Shortener API")
-                .description("Production REST API scaffold for DigitalOcean App Platform")
+                .description("Create, resolve, and manage short URLs")
                 .version("v1"));
   }
 }

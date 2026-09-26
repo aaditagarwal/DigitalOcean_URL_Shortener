@@ -16,7 +16,7 @@ class ReservedCodeCheckerTest {
   }
 
   @ParameterizedTest
-  @ValueSource(strings = {"api", "health", "actuator", "swagger-ui", "v3", "Health", "API"})
+  @ValueSource(strings = {"api", "health", "actuator", "swagger-ui", "v1", "Health", "API"})
   void treatsKnownSegmentsAsReserved(String code) {
     assertThat(checker.isReserved(code)).isTrue();
   }

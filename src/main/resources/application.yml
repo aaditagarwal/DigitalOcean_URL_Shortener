@@ -48,9 +48,10 @@ management:
 
 springdoc:
   api-docs:
-    path: /v3/api-docs
+    path: /v1/api-docs
   swagger-ui:
     path: /swagger-ui.html
+    url: /v1/api-docs
 
 app:
   public-base-url: ${PUBLIC_BASE_URL:}

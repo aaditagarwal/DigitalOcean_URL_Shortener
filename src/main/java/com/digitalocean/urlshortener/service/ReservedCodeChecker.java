@@ -14,7 +14,7 @@ public class ReservedCodeChecker {
           "actuator",
           "swagger-ui",
           "swagger-ui.html",
-          "v3",
+          "v1",
           "error",
           "favicon.ico",
           "urls");
