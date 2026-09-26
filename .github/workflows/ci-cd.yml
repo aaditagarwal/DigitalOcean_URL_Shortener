@@ -1,0 +1,66 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: cicd-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Maven Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+
+      - name: Run tests
+        run: mvn -B test
+
+      - name: Package
+        run: mvn -B -DskipTests package
+
+  deploy:
+    name: Deploy to DigitalOcean
+    needs: test
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+
+      - name: Upsert App Platform app
+        run: |
+          set -euo pipefail
+          APP_NAME="url_shortener_aadit"
+          APP_ID="$(doctl apps list -o json | python3 -c "
+          import json,sys
+          apps=json.load(sys.stdin)
+          matches=[a['id'] for a in apps if a.get('spec',{}).get('name')=='${APP_NAME}']
+          print(matches[0] if matches else '')
+          ")"
+          if [ -z "$APP_ID" ]; then
+            echo "Creating app ${APP_NAME}..."
+            doctl apps create --spec .do/app.yaml --format ID,DefaultIngress,Created --no-header
+          else
+            echo "Updating app ${APP_ID}..."
+            doctl apps update "$APP_ID" --spec .do/app.yaml
+            doctl apps create-deployment "$APP_ID" --wait=false
+          fi

@@ -1,0 +1,23 @@
+name: url_shortener_aadit
+region: blr
+
+services:
+  - name: api
+    github:
+      repo: aaditagarwal/DigitalOcean_URL_Shortener
+      branch: main
+      deploy_on_push: false
+    build_command: mvn -B -DskipTests package
+    run_command: java -jar target/url-shortener.jar
+    http_port: 8080
+    instance_count: 1
+    instance_size_slug: basic-xxs
+    health_check:
+      http_path: /health
+    envs:
+      - key: PORT
+        scope: RUN_TIME
+        value: "8080"
+      - key: JAVA_OPTS
+        scope: RUN_TIME
+        value: "-XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0"
