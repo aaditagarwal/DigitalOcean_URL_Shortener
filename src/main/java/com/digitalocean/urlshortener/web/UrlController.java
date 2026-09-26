@@ -13,6 +13,7 @@ import java.net.URI;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -56,6 +57,18 @@ public class UrlController {
       HttpServletRequest httpRequest) {
     String publicBaseUrl = resolvePublicBaseUrl(httpRequest);
     return ResponseEntity.ok(urlShortenerService.getMetadata(code, publicBaseUrl));
+  }
+
+  @DeleteMapping("/{code}")
+  @Operation(summary = "Soft-delete a short URL (idempotent if already inactive)")
+  public ResponseEntity<Void> delete(
+      @PathVariable
+          @Pattern(
+              regexp = ShortCodePatterns.CODE,
+              message = "code must match ^[A-Za-z0-9_-]{3,32}$")
+          String code) {
+    urlShortenerService.delete(code);
+    return ResponseEntity.noContent().build();
   }
 
   private String resolvePublicBaseUrl(HttpServletRequest request) {

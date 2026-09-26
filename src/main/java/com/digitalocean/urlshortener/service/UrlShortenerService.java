@@ -57,6 +57,18 @@ public class UrlShortenerService {
   }
 
   /**
+   * Soft-delete by code. Missing → {@link UrlNotFoundException}. Already inactive → no-op
+   * (idempotent).
+   */
+  @Transactional
+  public void delete(String code) {
+    if (!repository.existsByCode(code)) {
+      throw new UrlNotFoundException(code);
+    }
+    repository.deactivateByCode(code);
+  }
+
+  /**
    * Active + not expired → entity. Missing/inactive → {@link UrlNotFoundException}. Expired →
    * lazy soft-delete ({@code active=false}) then {@link UrlGoneException} (first hit after expiry
    * is {@code 410}; later reads are {@code 404}).

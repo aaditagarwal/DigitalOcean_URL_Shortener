@@ -51,3 +51,5 @@ Smoke scaffold + DB connectivity + persistence layer (Flyway `short_urls`, entit
 **Create API:** `POST /api/v1/urls` — auto-generated codes or optional `customCode` (409 on conflict).
 
 **Read APIs:** `GET /api/v1/urls/{code}` (metadata), `GET /{code}` (302 redirect + click count).
+
+**Delete API:** `DELETE /api/v1/urls/{code}` — soft-delete (`active=false`), idempotent `204`.
