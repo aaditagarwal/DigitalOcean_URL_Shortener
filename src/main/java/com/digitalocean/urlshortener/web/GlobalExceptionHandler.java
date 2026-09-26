@@ -3,9 +3,12 @@ package com.digitalocean.urlshortener.web;
 import com.digitalocean.urlshortener.service.CustomCodeConflictException;
 import com.digitalocean.urlshortener.service.ReservedCodeException;
 import com.digitalocean.urlshortener.service.ShortCodeAllocationException;
+import com.digitalocean.urlshortener.service.UrlGoneException;
+import com.digitalocean.urlshortener.service.UrlNotFoundException;
 import com.digitalocean.urlshortener.web.dto.ErrorResponse;
 import com.digitalocean.urlshortener.web.dto.ErrorResponse.FieldErrorDetail;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +26,27 @@ public class GlobalExceptionHandler {
       MethodArgumentNotValidException ex, HttpServletRequest request) {
     List<FieldErrorDetail> fieldErrors =
         ex.getBindingResult().getFieldErrors().stream().map(this::toDetail).toList();
+    ErrorResponse body =
+        ErrorResponse.of(
+            HttpStatus.BAD_REQUEST.value(),
+            HttpStatus.BAD_REQUEST.getReasonPhrase(),
+            "Validation failed",
+            request.getRequestURI(),
+            fieldErrors);
+    return ResponseEntity.badRequest().body(body);
+  }
+
+  @ExceptionHandler(ConstraintViolationException.class)
+  public ResponseEntity<ErrorResponse> handleConstraintViolation(
+      ConstraintViolationException ex, HttpServletRequest request) {
+    List<FieldErrorDetail> fieldErrors =
+        ex.getConstraintViolations().stream()
+            .map(
+                v ->
+                    new FieldErrorDetail(
+                        v.getPropertyPath() == null ? "unknown" : v.getPropertyPath().toString(),
+                        v.getMessage()))
+            .toList();
     ErrorResponse body =
         ErrorResponse.of(
             HttpStatus.BAD_REQUEST.value(),
@@ -67,6 +91,29 @@ public class GlobalExceptionHandler {
             ex.getMessage(),
             request.getRequestURI());
     return ResponseEntity.badRequest().body(body);
+  }
+
+  @ExceptionHandler(UrlNotFoundException.class)
+  public ResponseEntity<ErrorResponse> handleNotFound(
+      UrlNotFoundException ex, HttpServletRequest request) {
+    ErrorResponse body =
+        ErrorResponse.of(
+            HttpStatus.NOT_FOUND.value(),
+            HttpStatus.NOT_FOUND.getReasonPhrase(),
+            ex.getMessage(),
+            request.getRequestURI());
+    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
+  }
+
+  @ExceptionHandler(UrlGoneException.class)
+  public ResponseEntity<ErrorResponse> handleGone(UrlGoneException ex, HttpServletRequest request) {
+    ErrorResponse body =
+        ErrorResponse.of(
+            HttpStatus.GONE.value(),
+            HttpStatus.GONE.getReasonPhrase(),
+            ex.getMessage(),
+            request.getRequestURI());
+    return ResponseEntity.status(HttpStatus.GONE).body(body);
   }
 
   @ExceptionHandler(ShortCodeAllocationException.class)

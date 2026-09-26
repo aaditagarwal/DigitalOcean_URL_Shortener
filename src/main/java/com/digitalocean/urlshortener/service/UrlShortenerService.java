@@ -4,6 +4,7 @@ import com.digitalocean.urlshortener.persistence.ShortUrlRepository;
 import com.digitalocean.urlshortener.persistence.entity.ShortUrlEntity;
 import com.digitalocean.urlshortener.web.dto.CreateUrlRequest;
 import com.digitalocean.urlshortener.web.dto.UrlResponse;
+import java.time.Instant;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,8 +38,44 @@ public class UrlShortenerService {
     return createWithGeneratedCode(originalUrl, request.expiresAt(), publicBaseUrl);
   }
 
+  /** Metadata lookup — does not increment click count. */
+  @Transactional(noRollbackFor = UrlGoneException.class)
+  public UrlResponse getMetadata(String code, String publicBaseUrl) {
+    return toResponse(requireResolvable(code), publicBaseUrl);
+  }
+
+  /**
+   * Public redirect resolve — increments click count for active, non-expired codes.
+   *
+   * @return original URL for the {@code Location} header
+   */
+  @Transactional(noRollbackFor = UrlGoneException.class)
+  public String resolveForRedirect(String code) {
+    ShortUrlEntity entity = requireResolvable(code);
+    repository.incrementClickCountByCode(code);
+    return entity.getOriginalUrl();
+  }
+
+  /**
+   * Active + not expired → entity. Missing/inactive → {@link UrlNotFoundException}. Expired →
+   * lazy soft-delete ({@code active=false}) then {@link UrlGoneException} (first hit after expiry
+   * is {@code 410}; later reads are {@code 404}).
+   */
+  private ShortUrlEntity requireResolvable(String code) {
+    ShortUrlEntity entity =
+        repository.findByCode(code).orElseThrow(() -> new UrlNotFoundException(code));
+    if (!entity.isActive()) {
+      throw new UrlNotFoundException(code);
+    }
+    if (entity.isExpired(Instant.now())) {
+      repository.deactivateByCode(code);
+      throw new UrlGoneException(code);
+    }
+    return entity;
+  }
+
   private UrlResponse createWithCustomCode(
-      String customCode, String originalUrl, java.time.Instant expiresAt, String publicBaseUrl) {
+      String customCode, String originalUrl, Instant expiresAt, String publicBaseUrl) {
     reservedCodeChecker.requireNotReserved(customCode);
     try {
       ShortUrlEntity saved =
@@ -50,12 +87,11 @@ public class UrlShortenerService {
   }
 
   private UrlResponse createWithGeneratedCode(
-      String originalUrl, java.time.Instant expiresAt, String publicBaseUrl) {
+      String originalUrl, Instant expiresAt, String publicBaseUrl) {
     DataIntegrityViolationException lastCollision = null;
 
     for (int attempt = 1; attempt <= MAX_CODE_ALLOCATION_ATTEMPTS; attempt++) {
       String code = codeGenerator.generate();
-      // Skip extremely unlikely collision with reserved names
       if (reservedCodeChecker.isReserved(code)) {
         continue;
       }

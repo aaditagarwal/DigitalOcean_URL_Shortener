@@ -214,7 +214,7 @@ Client B ──► validate OK ──► INSERT my-link ──► unique violati
 
 ### 4.2 `GET /api/v1/urls/{code}` — Metadata
 
-Lookup only (no click increment) → `200` / `404` / `410`.
+Lookup only (no click increment) → `200` / `404` / `410`. On expiry, lazy soft-delete then `410` (see redirect section).
 
 ### 4.3 `DELETE /api/v1/urls/{code}` — Soft-delete
 
@@ -223,6 +223,8 @@ Set `active = false` → idempotent `204`.
 ### 4.4 `GET /{code}` — Redirect
 
 Lookup → active/expiry checks → increment `click_count` → `302` + `Location`.
+
+**Lazy expiry soft-delete:** on metadata or redirect, if the row is still `active` but `expires_at` is past, set `active=false` then return **`410`**. Later reads see inactive → **`404`**. No background job. Custom-code reuse after expiry is unchanged (unique constraint still holds; reclaim/undelete is future work).
 
 ### 4.5 Meta endpoints
 
@@ -320,7 +322,8 @@ com.digitalocean.urlshortener
 | Topic | Decision |
 |-------|----------|
 | Soft vs hard delete | Soft only (`active = false`); hard delete later |
-| Expired status | `410 Gone` |
+| Expired status | First read after expiry → lazy soft-delete + **`410 Gone`**; later → **`404`** |
+| Custom code after expiry | Unchanged — row remains; unique `code` still blocks recreate (reclaim later) |
 | Public invalid code | `404` |
 | Click counting | Redirect only |
 | Auth | Not required |

@@ -8,9 +8,13 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Pattern;
 import java.net.URI;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,6 +23,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
 @RequestMapping("/api/v1/urls")
+@Validated
 @Tag(name = "URLs")
 public class UrlController {
 
@@ -38,6 +43,19 @@ public class UrlController {
     UrlResponse body = urlShortenerService.create(request, publicBaseUrl);
     URI location = URI.create("/api/v1/urls/" + body.code());
     return ResponseEntity.status(HttpStatus.CREATED).location(location).body(body);
+  }
+
+  @GetMapping("/{code}")
+  @Operation(summary = "Fetch short URL metadata (does not increment click count)")
+  public ResponseEntity<UrlResponse> getMetadata(
+      @PathVariable
+          @Pattern(
+              regexp = ShortCodePatterns.CODE,
+              message = "code must match ^[A-Za-z0-9_-]{3,32}$")
+          String code,
+      HttpServletRequest httpRequest) {
+    String publicBaseUrl = resolvePublicBaseUrl(httpRequest);
+    return ResponseEntity.ok(urlShortenerService.getMetadata(code, publicBaseUrl));
   }
 
   private String resolvePublicBaseUrl(HttpServletRequest request) {
