@@ -30,7 +30,6 @@ class ShortUrlSchemaTest {
             SELECT LOWER(column_name)
             FROM information_schema.columns
             WHERE LOWER(table_name) = 'short_urls'
-              AND LOWER(table_schema) = 'urlshortener'
             ORDER BY ordinal_position
             """,
             (rs, rowNum) -> rs.getString(1));
@@ -60,7 +59,7 @@ class ShortUrlSchemaTest {
         jdbcTemplate.query(
             """
             SELECT CAST("version" AS VARCHAR)
-            FROM "urlshortener"."flyway_schema_history"
+            FROM "flyway_schema_history"
             WHERE "success" = TRUE
             ORDER BY "installed_rank"
             """,

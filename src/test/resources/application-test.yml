@@ -7,15 +7,9 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
-    properties:
-      hibernate:
-        default_schema: urlshortener
   flyway:
     enabled: true
     locations: classpath:db/migration
-    schemas: urlshortener
-    default-schema: urlshortener
-    create-schemas: true
   test:
     database:
       replace: none
