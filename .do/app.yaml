@@ -4,7 +4,11 @@ region: blr
 databases:
   - name: url-shortener-aadit-storage
     engine: PG
-    version: "17"
+    version: "18"
+    production: true
+    cluster_name: db-url-shortner
+    db_name: urlshortener_aadit
+    db_user: urlshortener_aadit
 
 services:
   - name: api
