@@ -1,6 +1,5 @@
 package com.digitalocean.urlshortener.persistence;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -8,7 +7,6 @@ import org.springframework.stereotype.Component;
  * Thin connectivity check used during DB wiring. Domain repositories come later.
  */
 @Component
-@ConditionalOnBean(JdbcTemplate.class)
 public class DatabasePingService {
 
   private final JdbcTemplate jdbcTemplate;
